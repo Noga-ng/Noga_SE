@@ -109,18 +109,18 @@ class SelectTest extends QueryTest{
 
     }
 
-    public function testSelectSimpleWithClause(){
-        $expected = <<<SQL
-            SELECT DISTINCT id
-            FROM users
-            WHERE age > 18
-            GROUP BY country
-            HAVING COUNT(*) > 1
-            ORDER BY id DESC
-            LIMIT 10
-            OFFSET 5
-        SQL;
-    }
+    // public function testSelectSimpleWithClause(){
+    //     $expected = <<<SQL
+    //         SELECT DISTINCT id
+    //         FROM users
+    //         WHERE age > 18
+    //         GROUP BY country
+    //         HAVING COUNT(*) > 1
+    //         ORDER BY id DESC
+    //         LIMIT 10
+    //         OFFSET 5
+    //     SQL;
+    // }
 
    
 

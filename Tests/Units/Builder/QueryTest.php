@@ -3,7 +3,7 @@ namespace Noga\Tests\Units\Builder;
 
 use PHPUnit\Framework\TestCase;
 
-class QueryTest extends TestCase
+abstract class QueryTest extends TestCase
 {
     protected function assertSqlEquals(string $expected, object $actual,string $prefix = 'wh'): void
     {

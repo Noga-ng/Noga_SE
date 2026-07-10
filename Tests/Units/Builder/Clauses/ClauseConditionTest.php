@@ -2,8 +2,7 @@
 namespace Noga\Tests\Units\Builder\Clauses;
 
 use Noga\Noga;
-use Noga\Tests\Units\Builder\QueryTest;
-
+use Noga\Tests\QueryTest;
 
 /**
  * Summary of ClauseConditionTest

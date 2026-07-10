@@ -2,7 +2,7 @@
 namespace Noga\Tests\Units\Builder\Select;
 
 use Noga\Noga;
-use Noga\Tests\Units\Builder\QueryTest;
+use Noga\Tests\QueryTest;
 
 class SelectTest extends QueryTest{
     public function testSelectBasic(){

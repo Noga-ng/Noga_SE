@@ -18,8 +18,8 @@
 ![Style](https://img.shields.io/badge/api-fluent%20builder-blueviolet?style=for-the-badge)
 
 ![Stars](https://img.shields.io/github/stars/nogagermainio/Noga_SE?style=for-the-badge)
-![Forks](https://img.shields.io/github/forks/nogagermainio/Noga_SE?style=for-the-badge)
-![Issues](https://img.shields.io/github/issues/nogagermainio/Noga_SE?style=for-the-badge)
+![Forks](https://img.shields.io/github/forks/noga-ng/Noga_SE?style=for-the-badge)
+![Issues](https://img.shields.io/github/issues/noga-ng/Noga_SE?style=for-the-badge)
 
 **Noga_SE** is a modern, fluent, and immutable SQL QueryBuilder built in PHP 8.1+. It provides an elegant and secure API for building SELECT, INSERT, UPDATE, and DELETE queries with automatic parameter binding to prevent SQL injections.
 
@@ -520,10 +520,10 @@ $admins = $base->where(['role' => 'admin']);
 
 ```bash
 # Unix/Linux/Mac
-./noga test
+./noga Test@handle
 
 # Windows
-noga.bat test
+noga.bat Test@handle
 ```
 
 ### Test Files
@@ -539,7 +539,7 @@ noga.bat test
 <phpunit bootstrap="vendor/autoload.php">
     <testsuites>
         <testsuite name="Builder SQL Suite">
-            <directory>./test</directory>
+            <directory>./Tests/Units</directory>
         </testsuite>
     </testsuites>
 </phpunit>
@@ -631,27 +631,32 @@ $analysis = Noga::explain(
 
 ## 🔧 Configuration
 
-### Database Configuration
-
-Configure via `NgManager` or environment file:
+### QueryBuilder Configuration
 
 ```php
-// Initialize configuration
-$config = NgManager::getInstance('path/to/ngconfig.ng');
+use Noga\Noga;
 
-// Access parameters
-$host = ng('db_host');
-$port = ng('db_port', 3306);
+Noga::config(
+   basePath:__DIR__,
+   cachePath:__DIR__."/src/cache",
+   driver:'mysql'
+);
+
 ```
 
-### Cache Configuration
+### Database Configuration
+
+Configure via `use Noga\Core\ReadFileng\Read` or environment file:
 
 ```php
-CacheManager::key("my_query")
-    ->dir("queries")
-    ->delay(3600)  // 1 hour
-    ->data($result)
-    ->put();
+use Noga\Core\ReadFileng\Read;
+
+// Initialize configuration
+(new Read(__DIR__."/Config/ngconfig.ng"))->loadEnv();
+
+// Access parameters
+$host = $_ENV['DB_HOST'];
+$port = $_ENV['DB_PORT'];
 ```
 
 ---
@@ -681,11 +686,14 @@ Contributions are welcome! Please follow these steps:
 
 ```bash
 # Clone repository
-git clone https://github.com/nogagermainio/Noga_SE.git
+git clone https://github.com/noga-ng/Noga_SE.git
 cd Noga_SE
 
 # Install dependencies
 composer install
+
+#composer require 
+composer require nogagermainio/noga-se
 
 # Run tests
 ./noga test
@@ -717,10 +725,10 @@ furnished to do so, subject to the following conditions above.
 
 ## 👨‍💻 Author
 
-**nogagermainio**
+**Noga Germainio**
 
-- GitHub: [@nogagermainio](https://github.com/nogagermainio)
-- Email: [your-email@example.com](mailto:contact@nogagermainio.dev)
+- GitHub: [@noga-ng](https://github.com/noga-ng)
+- Email: [nogagerma122@gmail.com](mailto:nogagerma122@gmail.com)
 
 ---
 
@@ -734,7 +742,7 @@ furnished to do so, subject to the following conditions above.
 
 ## 🆘 Support & Issues
 
-Found a bug? Want a feature? Please [open an issue](https://github.com/nogagermainio/Noga_SE/issues) with:
+Found a bug? Want a feature? Please [open an issue](https://github.com/noga-ng/Noga_SE/issues) with:
 
 - ✅ Clear problem description
 - ✅ Minimal code reproduction
@@ -810,13 +818,7 @@ A: Fork the repo, create a feature branch, and submit a pull request.
    CREATE INDEX idx_status ON users(status);
    ```
 
-4. **Batch Operations** - Insert multiple rows at once
-
-   ```php
-   ->values(...)->values(...)->values(...)
-   ```
-
-5. **Select Only Needed Columns** - Avoid SELECT *
+4. **Select Only Needed Columns** - Avoid SELECT *
 
    ```php
    ->select('id', 'name', 'email')  // Not SELECT *
@@ -826,9 +828,9 @@ A: Fork the repo, create a feature branch, and submit a pull request.
 
 ## 📞 Community & Discussions
 
-- 💬 [GitHub Discussions](https://github.com/nogagermainio/Noga_SE/discussions)
-- 🐛 [Issue Tracker](https://github.com/nogagermainio/Noga_SE/issues)
-- 📚 [Wiki & Documentation](https://github.com/nogagermainio/Noga_SE/wiki)
+- 💬 [GitHub Discussions](https://github.com/noga-ng/Noga_SE/discussions)
+- 🐛 [Issue Tracker](https://github.com/noga-ng/Noga_SE/issues)
+- 📚 [Wiki & Documentation](https://github.com/noga-ng/Noga_SE/wiki)
 
 ---
 
@@ -843,7 +845,6 @@ If you find Noga_SE helpful, please consider:
 
 ---
 
-**Made with ❤️ by nogagermainio**
+**Made with by Noga Germainio**
 
-Last updated: 2026-07-01  
-Version: 1.0.0
+Version: 0.1.1

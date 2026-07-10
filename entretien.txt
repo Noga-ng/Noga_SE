@@ -1,0 +1,50 @@
+Je suis un développeur Full Stack orienté backend, avec un intérêt 
+particulier pour l'architecture logicielle et la conception de composants réutilisables.
+
+Au cours de mon parcours, j'ai travaillé sur la conception de plusieurs composants inspirés 
+des frameworks modernes, notamment un système MVC, un routeur, des middlewares et des outils 
+de construction de requêtes SQL.
+
+Le projet technique sur lequel j'ai consacré le plus de temps est NOGA_SE.
+ Il s'agit d'un Query Builder SQL développé en PHP avec une API fluide et chaînable. 
+ L'objectif était de créer une couche d'abstraction permettant de construire et exécuter 
+ des requêtes SELECT, INSERT, UPDATE et DELETE de manière sécurisée grâce aux paramètres préparés.
+
+Ce projet m'a permis d'approfondir mes connaissances sur la génération SQL dynamique, la conception orientée objet,
+la séparation des responsabilités et les bonnes pratiques d'architecture backend.
+
+A propos de MVC :
+
+J'ai choisi l'architecture MVC parce qu'elle permet de séparer clairement les responsabilités
+ d'une application et facilite sa maintenance ainsi que son évolution.
+
+Dans cette architecture :
+
+* Le Model représente les données et la logique liée à leur manipulation. Il peut s'appuyer sur des couches
+ comme les repositories pour communiquer avec la base de données.
+
+* Le Controller est responsable de la gestion du cycle requête/réponse. Il reçoit les requêtes HTTP, valide les entrées,
+ appelle la logique métier nécessaire puis retourne une réponse.
+
+* La View est responsable de la présentation des données à l'utilisateur. Elle contient principalement
+ la partie affichage et ne doit pas contenir de logique métier complexe.
+
+Cette séparation permet d'avoir un code plus organisé, testable et plus facile à faire évoluer.
+
+
+Explication de securité contre l'injection sql
+
+La sécurité a été un point central dans la conception de mon Query Builder.
+
+La principale menace que j'ai voulu éviter est l'injection SQL, qui consiste à manipuler une requête en injectant du contenu SQL malveillant dans les entrées utilisateur.
+
+Pour protéger les requêtes générées, j'ai mis en place plusieurs mécanismes :
+
+Premièrement, j'utilise PDO avec des requêtes préparées et des paramètres liés. Cela permet de séparer complètement la structure SQL des valeurs fournies par l'utilisateur, empêchant ainsi qu'une donnée soit interprétée comme une instruction SQL.
+
+Deuxièmement, mon Query Builder possède un système interne de génération de paramètres uniques. J'utilise un mécanisme de hash pour générer des identifiants de paramètres afin d'éviter les collisions lors de la construction de requêtes complexes avec plusieurs conditions ou sous-requêtes.
+
+Enfin, j'ai mis en place une normalisation des différentes parties de la requête SQL, comme les colonnes, les clauses et les paramètres, afin de contrôler la génération du SQL final.
+
+Grâce à cette architecture, les requêtes générées par le Query Builder respectent les bonnes pratiques de sécurité et réduisent fortement les risques liés aux injections SQL.
+

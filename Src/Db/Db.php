@@ -55,7 +55,7 @@ abstract class Db implements \Noga\Contracts\Db\Db{
             static::$pdo->exec($this->set_session);
 
         } catch(PDOException $e) {
-            throw new RuntimeException("error connexion : ".$e->getMessage());
+            throw new PDOException("error connection : ".$e->getMessage());
         }
     }
     return static::$pdo;
@@ -80,7 +80,7 @@ abstract class Db implements \Noga\Contracts\Db\Db{
      * it catches the PDOException and throws a RuntimeException with an appropriate error message.
      * @param string $sql
      * @param array $params
-     * @throws RuntimeException
+     * @throws PDOException
      * @return bool|PDOStatement
      */
     public function execute(string $sql,array $params = []):bool|PDOStatement{
@@ -91,7 +91,7 @@ abstract class Db implements \Noga\Contracts\Db\Db{
          return $stmt;
 
        }catch(PDOException $e){
-        throw new RuntimeException("Erreur lors de l'exécution de la requête : ".$e->getMessage());
+        throw new PDOException("Erreur lors de l'exécution de la requête : ".$e->getMessage());
        }
        
     }
@@ -167,8 +167,8 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
      * It takes a SQL query as a string, prepares it using the PDO connection, executes it,
      *  and returns the resulting PDOStatement object. 
      * If any exceptions occur during the execution of the query, 
-     * it catches the PDOException and throws a RuntimeException with an appropriate error message.
-     * @throws RuntimeException
+     * it catches the PDOException and throws a PDOException with an appropriate error message.
+     * @throws PDOException
      * @param string $sql
      * @return bool|PDOStatement
      */
@@ -180,7 +180,7 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
             return $stmt;
 
         }catch(PDOException $e){
-            throw new RuntimeException($e->getMessage());
+            throw new PDOException($e->getMessage());
         }
        
     }
@@ -192,9 +192,9 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
      * The method begins a transaction using the PDO connection, executes the provided callback function,
      * and commits the transaction if all operations are successful. 
      *If any exceptions occur during the execution of the callback,
-     * it rolls back the transaction and throws a RuntimeException with an appropriate error message.
+     * it rolls back the transaction and throws a PDOException with an appropriate error message.
      * @param callable $callback 
-     * @throws RuntimeException
+     * @throws PDOException
      * @return void
      */
     public function totransaction(callable $callback):void{
@@ -206,7 +206,7 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
             $this->connect()->commit();
         }catch(Throwable $e){
             $this->connect()->rollBack();
-            throw new RuntimeException("Erreur de transaction : ".$e->getMessage());
+            throw new PDOException("Erreur de transaction : ".$e->getMessage());
         }
     }
 
@@ -219,7 +219,7 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
      * The specific format of the DSN string may vary depending on the database driver being used (e.g., MySQL, SQLite).
      * This method is abstract and must be implemented by subclasses to provide 
      * the appropriate DSN string based on their specific configuration.
-     * @throws RuntimeException
+     * @throws PDOException
      * @return string
      */
     abstract protected function getDsn():string;

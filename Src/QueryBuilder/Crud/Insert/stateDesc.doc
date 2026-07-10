@@ -1,0 +1,13 @@
+
+INSERT STEPS
+
+I . DEFINITION OF STATE
+
+STATE : [
+    - TYPE    : INSERT
+    - COLUMNS : []
+    - VALUES  : []
+    - TABLE   : ""
+    - PARAMS  : []
+    - BINDING : []
+    ]

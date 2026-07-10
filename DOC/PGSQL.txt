@@ -1,0 +1,520 @@
+voir la session active avec template1
+
+SELECT pid, usename, application_name, client_addr
+FROM pg_stat_activity
+WHERE datname = 'template1';
+
+2. Fermer les connexions (safe kill)
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = 'template1'
+  AND pid <> pg_backend_pid();
+
+  Cluster PostgreSQL
+   └── Database
+         └── Schema
+               ├── Table
+               ├── View
+               ├── Function
+               ├── Sequence
+               └── Types
+
+6. Search path (TRÈS IMPORTANT)
+
+PostgreSQL cherche les tables dans un ordre défini :
+
+SHOW search_path;
+
+Résultat typique :
+
+"$user", public
+Modifier le search_path :
+SET search_path TO auth, public;
+
+
+7. Lister les schemas
+SELECT schema_name
+FROM information_schema.schemata;
+
+Ou pg_catalog :
+
+SELECT nspname FROM pg_namespace;
+
+8. Voir les tables par schema
+SELECT table_schema, table_name
+FROM information_schema.tables
+WHERE table_schema NOT IN ('pg_catalog', 'information_schema');
+
+
+9. Permissions sur schema
+
+Donner accès :
+
+GRANT USAGE ON SCHEMA auth TO myuser;
+GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA auth TO myuser;
+
+
+🧨 10. Supprimer un schema
+
+⚠️ supprime TOUT dedans
+
+DROP SCHEMA auth CASCADE;
+
+
+11. Les 3 types de schemas importants
+1. public
+par défaut
+utilisé par pgAdmin et dev simple
+2. system schemas
+pg_catalog
+information_schema
+👉 lecture seule (moteur interne)
+3. custom schemas
+auth
+billing
+app
+logs
+👉 architecture propre
+
+🚀 12. Architecture recommandée (niveau pro)
+
+Exemple backend sérieux :
+
+auth      → users, sessions
+core      → business tables
+billing   → paiements
+audit     → logs
+public    → vide ou minimal
+
+
+🧠 13. Mental model (important)
+Database = projet
+Schema = module / namespace
+Table = data structure
+
+👉 PostgreSQL = langage organisé comme un gros framework
+
+⚡ 14. Piège classique débutant
+
+❌ Tout mettre dans public
+
+✔ Bon réflexe :
+
+séparer par domaine métier
+éviter conflit de noms
+préparer scaling
+🧭 Suite logique (très important pour toi)
+
+Maintenant que tu comprends les schemas, prochaine étape naturelle :
+
+Tables + relations (niveau solide)
+Constraints (PK, FK, CHECK)
+Index (performance réelle)
+Transactions
+EXPLAIN ANALYZE (debug perf)
+
+
+
+Chapitre 1 : Les tables
+
+Une table représente une entité.
+
+Exemples :
+
+Entité	Table
+Utilisateurs	users
+Produits	products
+Commandes	orders
+Catégories	categories
+
+Une table est composée de colonnes et de lignes.
+
+users
+
++----+--------+--------------------+
+| id | name   | email              |
++----+--------+--------------------+
+| 1  | Alice  | alice@mail.com     |
+| 2  | Bob    | bob@mail.com       |
++----+--------+--------------------+
+Créer une table
+CREATE TABLE users (
+    id INTEGER,
+    name TEXT,
+    email TEXT
+);
+
+Ici :
+
+id
+name
+email
+
+sont les colonnes.
+
+
+Les types de données
+
+Les plus utilisés sont :
+
+| Type             | Utilisation                |
+| ---------------- | -------------------------- |
+| SMALLINT         | Petit entier               |
+| INTEGER          | Entier                     |
+| BIGINT           | Grand entier               |
+| NUMERIC(p,s)     | Valeur exacte (argent)     |
+| REAL             | Nombre décimal             |
+| DOUBLE PRECISION | Nombre décimal plus précis |
+| BOOLEAN          | true / false               |
+| CHAR(n)          | Taille fixe                |
+| VARCHAR(n)       | Taille maximale            |
+| TEXT             | Texte illimité             |
+| DATE             | Date                       |
+| TIME             | Heure                      |
+| TIMESTAMP        | Date + heure               |
+| UUID             | Identifiant unique         |
+| JSON             | Données JSON               |
+| JSONB            | JSON optimisé              |
+
+
+
+C'est une excellente question. Cette table est souvent celle qui pose le plus de difficultés au début.
+
+Le problème à résoudre
+
+Imaginons deux tables.
+
+Étudiants
+students
+
+id | nom
+---+---------
+1  | Alice
+2  | Bob
+3  | Noga
+Cours
+courses
+
+id | nom
+---+-------------
+1  | PostgreSQL
+2  | PHP
+3  | Docker
+
+Maintenant, réponds à cette question :
+
+Quels cours suit Alice ?
+
+Alice peut suivre :
+
+PostgreSQL
+PHP
+Docker
+
+Ensuite :
+
+Qui suit le cours PostgreSQL ?
+
+Alice
+Bob
+Noga
+
+On a donc :
+
+un étudiant peut suivre plusieurs cours
+un cours peut être suivi par plusieurs étudiants
+
+C'est une relation plusieurs-à-plusieurs (N → N).
+
+Pourquoi ne pas mettre course_id dans students ?
+
+Par exemple :
+
+students
+
+id | nom   | course_id
+---+-------+----------
+1  | Alice | 1
+
+Mais Alice suit aussi PHP.
+
+Tu fais quoi ?
+
+id | nom   | course_id
+1  | Alice | 1
+1  | Alice | 2
+
+Tu répètes Alice plusieurs fois. C'est une mauvaise conception.
+
+Ou alors :
+
+course_id = 1,2,3
+
+C'est du texte, pas une vraie relation. Impossible à exploiter correctement avec SQL.
+
+Pourquoi ne pas mettre student_id dans courses ?
+
+Même problème.
+
+courses
+
+id | nom        | student_id
+---+------------+-----------
+1  | PostgreSQL | 1
+
+Mais PostgreSQL est suivi par Bob aussi.
+
+Tu serais obligé de dupliquer le cours.
+
+La solution : une table de liaison
+
+On crée une troisième table.
+
+CREATE TABLE student_course (
+    student_id INTEGER REFERENCES students(id),
+    course_id INTEGER REFERENCES courses(id),
+    PRIMARY KEY(student_id, course_id)
+);
+
+Cette table ne contient que les associations.
+
+Exemple :
+
+student_course
+
+student_id | course_id
+-----------+----------
+1          | 1
+1          | 2
+1          | 3
+2          | 1
+3          | 1
+3          | 3
+
+Cela signifie :
+
+Alice suit PostgreSQL
+Alice suit PHP
+Alice suit Docker
+Bob suit PostgreSQL
+Noga suit PostgreSQL
+Noga suit Docker
+Pourquoi une clé primaire composée ?
+PRIMARY KEY(student_id, course_id)
+
+Cela signifie que la combinaison (student_id, course_id) doit être unique.
+
+Par exemple :
+
+student_id | course_id
+-----------+----------
+1          | 2
+
+est autorisé.
+
+Mais ajouter une deuxième fois :
+
+student_id | course_id
+-----------+----------
+1          | 2
+
+sera refusé.
+
+En revanche :
+
+1 | 1
+1 | 2
+1 | 3
+
+est parfaitement valide.
+
+La clé primaire empêche simplement les doublons d'inscription au même cours.
+
+Visualisation
+students                student_course              courses
+
+1 Alice      ------\
+                     \                 /------ 1 PostgreSQL
+2 Bob         -------+--------------/
+                     |
+3 Noga       --------+--------------\------ 2 PHP
+                     |
+                     \---------------------- 3 Docker
+
+La table student_course joue le rôle d'un pont entre students et courses.
+
+Dans la vie réelle
+
+Ce modèle est utilisé partout :
+
+Utilisateur ↔ Rôle (user_roles)
+Produit ↔ Catégorie (product_categories)
+Film ↔ Acteur (movie_actors)
+Livre ↔ Auteur (book_authors)
+Employé ↔ Projet (employee_projects)
+Utilisateur ↔ Permission (user_permissions)
+
+Dès que chaque élément peut être lié à plusieurs éléments de l'autre table, on utilise une table de liaison.
+
+C'est l'une des structures les plus importantes à maîtriser en conception de bases de données relationnelles.
+
+| Contrainte  | Rôle                                  |
+| ----------- | ------------------------------------- |
+| PRIMARY KEY | Identifie une ligne de manière unique |
+| FOREIGN KEY | Relie deux tables                     |
+| NOT NULL    | Interdit les valeurs `NULL`           |
+| UNIQUE      | Empêche les doublons                  |
+| DEFAULT     | Donne une valeur par défaut           |
+| CHECK       | Vérifie une condition                 |
+
+
+Exercice pratique
+
+Dans pgAdmin, crée une base de données pour une bibliothèque avec les tables suivantes :
+
+authors : id, name
+books : id, title, price, author_id
+
+Contraintes :
+
+id : GENERATED ALWAYS AS IDENTITY PRIMARY KEY
+name et title : NOT NULL
+price : CHECK(price > 0)
+author_id : clé étrangère vers authors(id) avec ON DELETE RESTRICT
+
+
+Module : Création avancée des tables PostgreSQL
+
+CREATE TABLE
+│
+├── Colonnes
+│   ├── Types de données
+│   ├── DOMAIN
+│   ├── ENUM
+│   ├── ARRAY
+│   ├── JSON / JSONB
+│   ├── UUID
+│   ├── Types composites
+│   └── Types personnalisés
+│
+├── Contraintes
+│   ├── PRIMARY KEY
+│   ├── FOREIGN KEY
+│   ├── UNIQUE
+│   ├── CHECK
+│   ├── EXCLUDE
+│   └── DEFERRABLE
+│
+├── Valeurs automatiques
+│   ├── DEFAULT
+│   ├── GENERATED AS IDENTITY
+│   ├── GENERATED ALWAYS AS (...)
+│   └── Sequences
+│
+├── Héritage
+│   ├── INHERITS
+│   └── LIKE
+│
+├── Partitionnement
+│   ├── RANGE
+│   ├── LIST
+│   └── HASH
+│
+├── Stockage
+│   ├── TABLESPACE
+│   ├── STORAGE
+│   ├── TOAST
+│   ├── COMPRESSION
+│   └── Fillfactor
+│
+├── Tables spéciales
+│   ├── TEMP
+│   ├── UNLOGGED
+│   ├── FOREIGN TABLE
+│   └── MATERIALIZED VIEW
+│
+└── Sécurité
+    ├── Ownership
+    ├── Privileges
+    └── Row Level Security
+
+2. Les types de données avancés
+
+    UUID
+JSON
+JSONB
+ARRAY
+XML
+CIDR
+INET
+MACADDR
+POINT
+POLYGON
+TSVECTOR
+TSQUERY
+MONEY
+BYTEA
+
+
+
+CREATE TABLE
+│
+├── 1. Les types de données
+│      ├── Numériques
+│      ├── Texte
+│      ├── Date / Heure
+│      ├── Booléens
+│      ├── UUID
+│      ├── JSON / JSONB
+│      ├── ARRAY
+│      ├── ENUM
+│      ├── DOMAIN
+│      ├── Composite Type
+│      ├── Range Types
+│      ├── Réseau
+│      ├── Géométriques
+│      ├── BYTEA
+│      └── XML
+│
+├── 2. Les colonnes
+│      ├── NULL
+│      ├── DEFAULT
+│      ├── GENERATED
+│      ├── COLLATION
+│      ├── STORAGE
+│      └── COMPRESSION
+│
+├── 3. Les contraintes
+│      ├── PRIMARY KEY
+│      ├── UNIQUE
+│      ├── CHECK
+│      ├── FOREIGN KEY
+│      ├── EXCLUDE
+│      ├── DEFERRABLE
+│      └── Constraint Naming
+│
+├── 4. Les séquences
+│
+├── 5. Identity
+│
+├── 6. Index
+│
+├── 7. Tables temporaires
+│
+├── 8. Tables UNLOGGED
+│
+├── 9. Partitioning
+│
+├── 10. Inheritance
+│
+├── 11. Tablespaces
+│
+├── 12. Storage Parameters
+│
+├── 13. TOAST
+│
+├── 14. Vacuum
+│
+├── 15. FillFactor
+│
+└── ...

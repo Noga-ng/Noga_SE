@@ -1,0 +1,285 @@
+| Fonctionnalité                    | PostgreSQL |        MySQL        |
+| --------------------------------- | :--------: | :-----------------: |
+| Materialized View                 |      ✅     |          ❌          |
+| `RETURNING`                       |      ✅     |          ❌          |
+| `DISTINCT ON`                     |      ✅     |          ❌          |
+| `FILTER`                          |      ✅     |          ❌          |
+| `LATERAL`                         |      ✅     |          ❌          |
+| Arrays                            |      ✅     |          ❌          |
+| Composite Types                   |      ✅     |          ❌          |
+| Domain Types                      |      ✅     |          ❌          |
+| Range Types                       |      ✅     |          ❌          |
+| Multirange Types                  |      ✅     |          ❌          |
+| Exclusion Constraints             |      ✅     |          ❌          |
+| Deferrable Constraints            |      ✅     |          ❌          |
+| JSONB                             |      ✅     | ❌ (JSON uniquement) |
+| GIN Index                         |      ✅     |          ❌          |
+| GiST Index                        |      ✅     |          ❌          |
+| BRIN Index                        |      ✅     |          ❌          |
+| SP-GiST                           |      ✅     |          ❌          |
+| Opérateurs personnalisés          |      ✅     |          ❌          |
+| Types personnalisés               |      ✅     |          ❌          |
+| Agrégats personnalisés            |      ✅     |          ❌          |
+| Fonctions dans plusieurs langages |      ✅     |          ❌          |
+| Extensions                        |      ✅     |          ❌          |
+| Foreign Data Wrapper              |      ✅     |          ❌          |
+| Table Inheritance                 |      ✅     |          ❌          |
+
+
+1. Materialized View
+
+CREATE MATERIALIZED VIEW ventes_resume AS
+SELECT
+    client_id,
+    SUM(total) AS montant
+FROM ventes
+GROUP BY client_id;
+
+REFRESH MATERIALIZED VIEW ventes_resume;
+
+RETURNING
+
+INSERT INTO clients(nom)
+VALUES ('Jean')
+RETURNING id, nom;
+
+3. DISTINCT ON
+Retourne une seule ligne par client.
+
+SELECT DISTINCT ON (client_id)
+    client_id,
+    date_commande,
+    total
+FROM commandes
+ORDER BY client_id, date_commande DESC;
+
+4. FILTER
+SELECT
+    COUNT(*) AS total,
+    COUNT(*) FILTER (
+        WHERE sexe='H'
+    ) AS hommes,
+    COUNT(*) FILTER (
+        WHERE sexe='F'
+    ) AS femmes
+FROM personnes;
+
+
+5. LATERAL
+SELECT
+    c.nom,
+    x.total
+FROM clients c
+
+CROSS JOIN LATERAL (
+
+    SELECT SUM(total) total
+
+    FROM commandes
+
+    WHERE client_id=c.id
+
+) x;
+
+Insertion
+
+INSERT INTO users(roles)
+
+VALUES (
+
+ARRAY[
+'admin',
+'editor'
+]
+
+);
+
+
+Recherche
+
+SELECT *
+
+FROM users
+
+WHERE
+
+'admin'
+
+=
+
+ANY(roles);
+
+
+7. Composite Type
+CREATE TYPE adresse AS(
+
+ville text,
+
+cp text
+
+);
+
+Puis
+
+CREATE TABLE clients(
+
+id SERIAL,
+
+adresse adresse
+
+);
+
+8. Domain Type
+CREATE DOMAIN email_type
+
+AS TEXT
+
+CHECK(
+
+VALUE LIKE '%@%'
+
+);
+
+Puis
+
+CREATE TABLE users(
+
+email email_type
+
+);
+
+
+9. Range Type
+CREATE TABLE reservation(
+
+periode tsrange
+
+);
+
+Recherche
+
+SELECT *
+
+FROM reservation
+
+WHERE
+
+periode
+
+&&
+
+tsrange(
+
+'2026-01-01',
+
+'2026-01-10'
+
+);
+
+
+10. JSONB
+SELECT *
+
+FROM produits
+
+WHERE
+
+infos
+
+@>
+
+'{"marque":"Dell"}';
+
+L'opérateur @> recherche un objet JSON contenu dans un autre.
+
+
+11. GIN Index
+CREATE INDEX idx_json
+
+ON produits
+
+USING GIN(infos);
+
+Parfait pour les recherches dans JSONB.
+
+12. GiST
+CREATE INDEX idx_geo
+
+ON villes
+
+USING GIST(position);
+
+Utilisé pour les données spatiales et certains types spécialisés.
+
+13. BRIN
+CREATE INDEX idx_date
+
+ON ventes
+
+USING BRIN(date);
+
+Très efficace sur des tables gigantesques où les données sont naturellement ordonnées.
+
+14. Opérateur personnalisé
+CREATE OPERATOR ## (
+
+LEFTARG = integer,
+
+RIGHTARG = integer,
+
+PROCEDURE = addition
+
+);
+
+Puis
+
+SELECT
+
+5 ## 8;
+
+15. Type personnalisé
+CREATE TYPE couleur AS ENUM(
+
+'rouge',
+
+'vert',
+
+'bleu'
+
+);
+
+16. Agrégat personnalisé
+CREATE AGGREGATE moyenne(
+
+SFUNC = somme,
+
+STYPE = integer
+
+);
+
+19. Foreign Data Wrapper
+
+Lire une table distante comme une table locale.
+
+CREATE EXTENSION postgres_fdw;
+
+Puis
+
+SELECT *
+
+FROM serveur_distant.clients;
+20. Deferrable Constraint
+
+La contrainte est vérifiée à la fin de la transaction.
+
+CREATE TABLE test(
+
+id INT PRIMARY KEY,
+
+parent INT REFERENCES test(id)
+
+DEFERRABLE
+
+INITIALLY DEFERRED
+
+);

@@ -1,0 +1,41 @@
+<?php
+
+$autoload = [
+    __DIR__."/../../autoload.php",
+    __DIR__."/../autoload.php",
+    __DIR__."/autoload.php",
+    __DIR__."/vendor/autoload.php"
+];
+
+foreach($autoload as $file){
+    if(file_exists($file)){
+        define("COMPOSER_INSTALL",$file);
+    }
+
+}
+
+unset($file);
+
+require COMPOSER_INSTALL;
+
+use Noga\CLI\Command\Command;
+use Noga\Core\ReadFileng\Read;
+use Noga\CLI\kernel;
+use Noga\Noga;
+
+(new Read(__DIR__."/Config/ngconfig.ng"))->loadEnv();
+
+Noga::config(
+    __DIR__,
+    __DIR__."/src/cache",
+    'mysql'
+);
+
+if(PHP_SAPI === 'cli'){
+    Command::get(["src","tests"]);
+
+Kernel::run($argv);
+exit(0);
+
+}
+

@@ -1,0 +1,190 @@
+tests/
+│
+├── Unit/
+│   ├── SelectTest.php
+│   ├── InsertTest.php
+│   ├── UpdateTest.php
+│   ├── DeleteTest.php
+│   ├── JoinTest.php
+│   ├── UnionTest.php
+│   ├── CaseTest.php
+│   ├── AggregateTest.php
+│   ├── SubQueryTest.php
+│   ├── CteTest.php
+│   ├── BindHashingTest.php
+│   ├── CacheTest.php
+│   ├── ImmutableTest.php
+│   └── ExceptionTest.php
+│
+└── Feature/
+    ├── MysqlTest.php
+    ├── SqliteTest.php
+    └── PostgreSqlTest.php
+
+
+
+    Les tests prioritaires
+
+Commence par couvrir chaque fonctionnalité publique.
+
+SELECT
+select()
+distinct()
+alias
+where()
+whereOr()
+whereLike()
+whereIn()
+whereBetween()
+whereExists()
+orderBy()
+groupBy()
+having()
+limit()
+offset()
+
+≈ 30 tests.
+
+INSERT
+une ligne
+plusieurs lignes
+from(json)
+colonnes automatiques
+erreurs
+
+≈ 20 tests.
+
+UPDATE
+set()
+where()
+limit()
+validation
+
+≈ 15 tests.
+
+DELETE
+simple
+avec where
+avec limit
+protection contre une suppression sans condition (si prévue)
+
+≈ 10 tests.
+
+JOIN
+
+Teste :
+
+INNER
+LEFT
+RIGHT
+CROSS
+plusieurs JOIN
+alias
+
+≈ 20 tests.
+
+UNION
+UNION
+UNION ALL
+plusieurs unions
+union avec sous-requête
+
+≈ 15 tests.
+
+CTE
+simple
+récursive
+plusieurs CTE
+
+≈ 10 tests.
+
+Sécurité
+injection SQL
+paramètres générés
+noms de paramètres uniques
+immutabilité
+
+≈ 20 tests.
+
+vendor/bin/phpunit --coverage-text
+
+vendor/bin/phpunit --coverage-html coverage
+
+tests/
+├── Connection/
+├── Grammar/
+│   ├── MysqlGrammarTest.php
+│   ├── SQLiteGrammarTest.php
+│   └── PgsqlGrammarTest.php
+├── QueryBuilder/
+│   ├── SelectTest.php
+│   ├── InsertTest.php
+│   ├── UpdateTest.php
+│   ├── DeleteTest.php
+│   ├── JoinTest.php
+│   ├── WhereTest.php
+│   ├── AggregateTest.php
+│   ├── BindingTest.php
+│   └── CacheTest.php
+├── Schema/
+├── Mapping/
+├── State/
+├── Facade/
+└── Integration/
+
+assertSame()
+assertEquals()
+assertTrue()
+assertFalse()
+assertNull()
+assertNotNull()
+assertCount()
+assertEmpty()
+assertNotEmpty()
+assertArrayHasKey()
+assertContains()
+assertStringContainsString()
+assertStringStartsWith()
+assertStringEndsWith()
+assertInstanceOf()
+assertNotSame()
+expectException()
+expectExceptionMessage()
+
+SELECT
+INSERT
+UPDATE
+DELETE
+JOIN
+GROUP BY
+ORDER BY
+HAVING
+UNION
+LIMIT
+DISTINCT
+COUNT
+SUM
+AVG
+MIN
+MAX
+COALESCE
+CASE
+
+ROW_NUMBER()
+RANK()
+DENSE_RANK()
+LAG()
+LEAD()
+FIRST_VALUE()
+LAST_VALUE()
+
+INSERT INTO clients(id,nom)
+VALUES(1,'Paul')
+ON DUPLICATE KEY UPDATE
+nom='Paul';
+
+INSERT INTO clients(id,nom)
+VALUES(1,'Paul')
+ON CONFLICT(id)
+DO UPDATE
+SET nom=EXCLUDED.nom;

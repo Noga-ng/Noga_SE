@@ -8,10 +8,9 @@ use Noga\Traits\CacheQuery;
 use PDOException;
 use RuntimeException;
 use Noga\Core\BindHashing;
-use Noga\Noga;
 use Noga\Traits\DbTrait;
 
-class Insert implements InsertInt
+final class Insert implements InsertInt
 {
     use DbTrait;
     use CacheQuery;
@@ -23,9 +22,8 @@ class Insert implements InsertInt
 
     public function __construct()
     {
-        $this->driver = Noga::get('driver');
         $this->state = new InsertState('INSERT');
-        $this->state->driver = $this->driver;
+        $this->state->driver = $this->getDriver();
     }
     
     /**
@@ -110,7 +108,7 @@ class Insert implements InsertInt
         $data = \json_decode($json,true);
         
         if(!\is_array($clone->data)){
-            throw new RuntimeException("Invalide JSON values. ");
+            throw new RuntimeException("Invalid JSON values. ");
         }
         
          $columns = \array_diff(array_keys($data[0]),$clone->state->except);

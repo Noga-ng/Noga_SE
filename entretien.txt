@@ -36,15 +36,22 @@ Explication de securité contre l'injection sql
 
 La sécurité a été un point central dans la conception de mon Query Builder.
 
-La principale menace que j'ai voulu éviter est l'injection SQL, qui consiste à manipuler une requête en injectant du contenu SQL malveillant dans les entrées utilisateur.
+La principale menace que j'ai voulu éviter est l'injection SQL, qui consiste à manipuler
+une requête en injectant du contenu SQL malveillant dans les entrées utilisateur.
 
 Pour protéger les requêtes générées, j'ai mis en place plusieurs mécanismes :
 
-Premièrement, j'utilise PDO avec des requêtes préparées et des paramètres liés. Cela permet de séparer complètement la structure SQL des valeurs fournies par l'utilisateur, empêchant ainsi qu'une donnée soit interprétée comme une instruction SQL.
+Premièrement, j'utilise PDO avec des requêtes préparées et des paramètres liés.
+Cela permet de séparer complètement la structure SQL des valeurs fournies par l'utilisateur,
+empêchant ainsi qu'une donnée soit interprétée comme une instruction SQL.
 
-Deuxièmement, mon Query Builder possède un système interne de génération de paramètres uniques. J'utilise un mécanisme de hash pour générer des identifiants de paramètres afin d'éviter les collisions lors de la construction de requêtes complexes avec plusieurs conditions ou sous-requêtes.
+Deuxièmement, mon Query Builder possède un système interne de génération de paramètres uniques.
+J'utilise un mécanisme de hash pour générer des identifiants de paramètres afin d'éviter les collisions
+lors de la construction de requêtes complexes avec plusieurs conditions ou sous-requêtes.
 
-Enfin, j'ai mis en place une normalisation des différentes parties de la requête SQL, comme les colonnes, les clauses et les paramètres, afin de contrôler la génération du SQL final.
+Enfin, j'ai mis en place une normalisation des différentes parties de la requête SQL, comme les colonnes,
+les clauses et les paramètres, afin de contrôler la génération du SQL final.
 
-Grâce à cette architecture, les requêtes générées par le Query Builder respectent les bonnes pratiques de sécurité et réduisent fortement les risques liés aux injections SQL.
+Grâce à cette architecture, les requêtes générées par le Query Builder respectent les bonnes pratiques
+de sécurité et réduisent fortement les risques liés aux injections SQL.
 

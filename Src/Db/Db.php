@@ -2,6 +2,7 @@
 namespace Noga\Db;
 
 use Generator;
+use Noga\QueryBuilder\Select\Select;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -12,14 +13,15 @@ use Throwable;
  * Summary of Db
  */
 abstract class Db implements \Noga\Contracts\Db\Db{
-    private static ?PDO $pdo = null;
+    private ?PDO $pdo = null;
     protected array $instanceDb = [];
+    private string $key = "";
     protected string $host;
     protected ?int $port;
     protected string $username;
     protected string $password;
-    protected string $database;
-    protected string $charset = "utf8_mb4";
+    protected ?string $database = null;
+    protected string $charset = "utf8mb4";
     protected string $driver;
     protected string $collation = "utf8mb4_general_ci";
     protected string $set_session = "SET SESSION sql_mode=''";
@@ -29,7 +31,9 @@ abstract class Db implements \Noga\Contracts\Db\Db{
         PDO::ATTR_EMULATE_PREPARES => false
        ];
 
-    public function __construct(){}
+    public function __construct(){
+        $this->key = md5($this->getDsn());
+    }
 
     /**
      * Summary of connect 
@@ -44,21 +48,30 @@ abstract class Db implements \Noga\Contracts\Db\Db{
      */
 
   public function connect():PDO|null{
-    if(!static::$pdo instanceof PDO){
         try {
-            static::$pdo = new PDO(
+
+         if(!isset($this->instanceDb[$this->key])){
+         
+            $this->pdo = new PDO(
                 $this->getDsn(), 
             $this->getUsername(),
                 $this->getPassword(),
                 $this->getOptions()
             );
-            static::$pdo->exec($this->set_session);
+
+            $this->pdo->exec($this->set_session);
+
+            $this->instanceDb[$this->key] = $this->pdo;
+
+           }
+
+            return $this->instanceDb[$this->key];
+
 
         } catch(PDOException $e) {
-            throw new PDOException("error connection : ".$e->getMessage());
+            throw new RuntimeException("error connection : ".$e->getMessage());
         }
-    }
-    return static::$pdo;
+
 }
 
     /**
@@ -80,10 +93,10 @@ abstract class Db implements \Noga\Contracts\Db\Db{
      * it catches the PDOException and throws a RuntimeException with an appropriate error message.
      * @param string $sql
      * @param array $params
-     * @throws PDOException
-     * @return bool|PDOStatement
+     * @throws RuntimeException
+     * @return PDOStatement
      */
-    public function execute(string $sql,array $params = []):bool|PDOStatement{
+    public function execute(string $sql,array $params = []):PDOStatement{
        try{
 
         $stmt = $this->connect()->prepare($sql);
@@ -91,7 +104,7 @@ abstract class Db implements \Noga\Contracts\Db\Db{
          return $stmt;
 
        }catch(PDOException $e){
-        throw new PDOException("Erreur lors de l'exécution de la requête : ".$e->getMessage());
+        throw new RuntimeException("{$this->driver} => Request error : ".$e->getMessage());
        }
        
     }
@@ -107,8 +120,9 @@ abstract class Db implements \Noga\Contracts\Db\Db{
      * @param string $sql
      * @param array $params
      * @param int $fetchMode
+     * @return mixed
      */
-    public function One(string $sql,array $params = [],int $fetchMode = PDO::FETCH_OBJ){
+    public function one(string $sql,array $params = [],int $fetchMode = PDO::FETCH_OBJ):mixed{
         $stmt = $this->execute($sql,$params);
         return $stmt->fetch($fetchMode);
     }
@@ -127,7 +141,7 @@ abstract class Db implements \Noga\Contracts\Db\Db{
      * @param int $fetchMode
      * @return array
      */
-   public function All(string $sql, array $params = [],int $fetchMode = PDO::FETCH_OBJ):array{
+   public function all(string $sql, array $params = [],int $fetchMode = PDO::FETCH_OBJ):array{
 
     $stmt = $this->execute($sql, $params);
 
@@ -156,7 +170,7 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
      * this method is responsible for retrieving the last inserted ID from the database.
      * @return bool|string
      */
-    public function lastId():bool|string{
+    public function lastId():string{
         return $this->connect()->lastInsertId();
     }
 
@@ -167,12 +181,12 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
      * It takes a SQL query as a string, prepares it using the PDO connection, executes it,
      *  and returns the resulting PDOStatement object. 
      * If any exceptions occur during the execution of the query, 
-     * it catches the PDOException and throws a PDOException with an appropriate error message.
-     * @throws PDOException
+     * it catches the PDOException and throws a RuntimeException with an appropriate error message.
+     * @throws RuntimeException
      * @param string $sql
      * @return bool|PDOStatement
      */
-    public function create(string $sql):bool|PDOStatement{
+    public function create(string $sql):PDOStatement{
         try{
             
             $stmt = $this->connect()->prepare($sql);
@@ -180,7 +194,7 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
             return $stmt;
 
         }catch(PDOException $e){
-            throw new PDOException($e->getMessage());
+            throw new RuntimeException("{$this->driver} : ".$e->getMessage());
         }
        
     }
@@ -192,22 +206,28 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
      * The method begins a transaction using the PDO connection, executes the provided callback function,
      * and commits the transaction if all operations are successful. 
      *If any exceptions occur during the execution of the callback,
-     * it rolls back the transaction and throws a PDOException with an appropriate error message.
+     * it rolls back the transaction and throws a RuntimeException with an appropriate error message.
      * @param callable $callback 
-     * @throws PDOException
-     * @return void
+     * @throws RuntimeException
+     * @return mixed
      */
-    public function totransaction(callable $callback):void{
+    public function toTransaction(callable|Select $callback,object $object):mixed{
+        
         $this->connect()->beginTransaction();
         try{
 
-            \call_user_func($callback,$this);
-
+            $data = \call_user_func($callback,$object);
+             
             $this->connect()->commit();
+           return $data;
         }catch(Throwable $e){
             $this->connect()->rollBack();
-            throw new PDOException("Erreur de transaction : ".$e->getMessage());
+            throw new RuntimeException("{$this->driver} => Transaction error : ".$e->getMessage());
         }
+    }
+
+    public function getDatabase():string{
+        return $this->database;
     }
 
     /**

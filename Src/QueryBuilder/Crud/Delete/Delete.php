@@ -2,13 +2,12 @@
 namespace Noga\QueryBuilder\Crud\Delete;
 
 use Noga\Contracts\Delete\DeleteInt;
-use Noga\Noga;
 use PDOException;
 use PDOStatement;
 use Noga\Traits\Condition;
 use Noga\Traits\DbTrait;
 
-class Delete implements DeleteInt
+final class Delete implements DeleteInt
 {
     use Condition;
     use DbTrait;
@@ -16,9 +15,8 @@ class Delete implements DeleteInt
     public function __construct(string $table)
     {
        $this->state = new DeleteState('DELETE');
-       $this->state->table = $table;
-       $this->driver = Noga::get('driver');
-      
+       $this->state->table = $table;  
+       $this->state->driver = $this->getDriver();
     }
 
     public static function table(string $table):Delete{

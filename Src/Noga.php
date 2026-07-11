@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Noga;
 define("NOGA_SE_VERSION",'0.1.1');
 
@@ -10,7 +10,9 @@ use Noga\QueryBuilder\Select\Select;
 
 /**
  * Summary of Noga design pattern static 
- * @method static Select table(string|callable $table,string $alias = '')
+ * @method static Select table(string|callable|Select $table,string $alias = '')
+ * @method static Select driver(?string $driver)
+ * @method static Select database(?string $database = null)
  * @method static Select add_Query(string $key)
  * @method static Select use_query(string $key)
  * @method static Insert insert(string $table = '')
@@ -18,6 +20,7 @@ use Noga\QueryBuilder\Select\Select;
  * @method static Delete delete(string $table = '')
  * @method static Select with(string $cte, Select | callable $callback, ?bool $recursive = false)
  * @method static Select explain(callable | Select | string $explain, string $mode = '')
+ * @method static mixed transaction(callable | Select $callback)
  * @mixin Select
  */
 final class Noga extends Facade
@@ -49,20 +52,17 @@ final class Noga extends Facade
 
     /**
      * Summary of get
-     * @var array{base_path:string,cache_path:string,driver:string}
      * @param string $key
      * @return mixed
      */
     public static function get(string $key): ?string
     {
-       
         return self::$config[$key] ?? null;
     }
 
   public function getProcessClass(): string
     {
-        return Select::class;
-        
+        return Select::class; 
     } 
   
 }

@@ -70,7 +70,8 @@ interface Db{
       /**
        * Summary of totransaction
        * @param callable $callback
-       * @return void
+       * @param object $object
+       * @return mixed
        */
-      public function totransaction(callable $callback):void;
+      public function toTransaction(callable $callback,object $object):mixed;
 }

@@ -24,7 +24,7 @@ class Sqlite extends Db
 
     protected function getOptions(): array
     {
-        return $_ENV['Lite_options'] ?: [
+        return $_ENV['Lite_option'] ?: [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,

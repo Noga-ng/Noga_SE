@@ -6,19 +6,32 @@ use Noga\Noga;
 
 class Test{
       public static function handle(){
-     $builder = Noga::with(
-        "categories_cte",
-        Noga::table("membres", "c")
-            ->select("id", "parent_id", "name")
-            ->unionAll(Noga::u()
-                ->from("conjointes","enfants")
-            )
-    ,true)
-    ->table("categories_cte")
-    ->select("id", "name", "category_id")
-    ->where(["active" => 1])
-    ->getQuery();
+        
+       $table = Noga::table(Noga::table("noga")->select("id"),"n")
+        ->select(
+          [Noga::table("users")
+          ->select("id")
+          ->where(["id"=>21]),"s"],"noms")
+        ->viewState();
 
-        Render::data($builder)->json();
+        $in = Noga::insert("users")
+        ->columns("noms","prenoms")
+        ->values("noga","Germainio")
+        ->viewState();
+
+        $up = Noga::update("users")
+          ->set(["prenoms"=>"Germainio","noms"=>"noga"])
+          ->where(["id"=>12])
+          ->viewState();
+
+        $del = Noga::delete("users")
+          ->driver("mysql")
+          ->where(["id"=>25])
+          ->viewState();
+
+       
+        Render::data(
+          $del
+            )->json();
     } 
 }

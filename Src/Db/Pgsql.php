@@ -3,14 +3,14 @@ namespace Noga\Db;
 
 use Noga\Db\Db;
 
-class Pgsql extends Db
+final class Pgsql extends Db
 {
-    public function __construct(protected string $database = '')
+    public function __construct(?string $database = null)
     {
         $this->driver   = $_ENV['PG_DRIVER'] ?? 'pgsql';
         $this->host     = $_ENV['PG_HOST'] ?? 'localhost';
         $this->port     = $_ENV['PG_PORT'] ?: 5432;
-        $this->database = $this->database ?: $_ENV['PG_DATABASE'];
+        $this->database = ($database !== null) ? $database : $_ENV['PG_DATABASE'];
         $this->charset  = $_ENV['PG_CHARSET'] ?? 'UTF8';
         // PostgreSQL-safe session
         $this->set_session = "SET client_encoding = 'UTF8'";

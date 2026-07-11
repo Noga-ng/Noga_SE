@@ -5,7 +5,7 @@ final class InsertState
 {
     public function __construct(
         public ?string $type = null,
-        public string $driver = "",
+        public ?string $driver = null,
         public ?string $table = null,
         public array $columns = [],
         public array $values = [],

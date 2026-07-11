@@ -1,8 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 namespace Noga\QueryBuilder\Select;
 
-use Noga\Core\CacheManager;
-use Noga\Noga;
+
 use Noga\QueryBuilder\Crud\Delete\Delete;
 use Noga\QueryBuilder\Crud\Insert\Insert;
 use Noga\QueryBuilder\Crud\Update\Update;
@@ -26,7 +25,6 @@ class Select{
     public function __construct()
     {
         $this->table = "";
-        $this->driver = Noga::get('driver');
     }
 
     /**
@@ -271,17 +269,6 @@ class Select{
     }
 
     /**
-     * Summary of transaction
-     * @param callable $callback
-     * @return static
-     */
-    public function transaction(callable | Select $callback): static
-    {
-        $this->db->totransaction($callback);
-        return $this;
-    }
-
-    /**
      * Summary of unions
      * @param bool $all
      * @param Union|callable $query
@@ -482,11 +469,6 @@ class Select{
         $this->params;
     }
 
-    public function getDriver(): string
-    {
-        return $this->driver ?? '';
-    }
-
     /**
      * Summary of getTable
      * @return string
@@ -556,7 +538,7 @@ class Select{
      */
     public function get(int $fetchMode = \PDO::FETCH_OBJ): array
     {
-        return $this->db()->All(
+        return $this->db()->all(
             $this->getQuery(),
             $this->getParams(),
             $fetchMode
@@ -583,7 +565,7 @@ class Select{
      */
     public function getOne(int $fetchMode = \PDO::FETCH_OBJ)
     {
-        return $this->db()->One(
+        return $this->db()->one(
             $this->getQuery(),
             $this->getParams(), $fetchMode
         );

@@ -3,7 +3,7 @@ namespace Noga\Db;
 
 use Noga\Db\Db;
 class Mysql extends Db{
-    public function __construct(protected string $database = '')
+    public function __construct(protected ?string $database = null)
     {
             $this->driver = $_ENV['MY_DRIVER'] ?? 'mysql';
             $this->host = $_ENV['MY_HOST'] ?? '127.0.0.1';

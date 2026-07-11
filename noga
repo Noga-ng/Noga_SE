@@ -28,7 +28,7 @@ use Noga\Noga;
 Noga::config(
     __DIR__,
     __DIR__."/src/cache",
-    'mysql'
+    'pgsql'
 );
 
 if(PHP_SAPI === 'cli'){

@@ -4,13 +4,12 @@ namespace Noga\QueryBuilder\Crud\Update;
 use PDOException;
 use PDOStatement;
 use Noga\Core\BindHashing;
-use Noga\Noga;
 use Noga\Traits\Condition;
 use Noga\Traits\DbTrait;
 /**
  * Summary of CRUDUpdate
  */
-class Update
+final class Update
 {
     use Condition;
     use DbTrait;
@@ -21,8 +20,7 @@ class Update
     {
        $this->state = new UpdateState('UPDATE');
        $this->state->table = $table;
-       $this->driver = Noga::get('driver');
-       $this->state->driver = $this->driver;
+       $this->state->driver = $this->getDriver();
     }
 
     /**

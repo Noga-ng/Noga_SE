@@ -12,13 +12,16 @@ final class Pgsql extends Db
         $this->port     = $_ENV['PG_PORT'] ?: 5432;
         $this->database = ($database !== null) ? $database : $_ENV['PG_DATABASE'];
         $this->charset  = $_ENV['PG_CHARSET'] ?? 'UTF8';
+        $this->username = $_ENV['PG_USERSNAME'] ?? 'postgres';
+        $this->password = $_ENV['PG_PASSWORD'] ?? '';
+        $this->options = $_ENV['PG_OPTIONS'] ?? $this->options;
         // PostgreSQL-safe session
         $this->set_session = "SET client_encoding = 'UTF8'";
     }
 
     protected function getDsn(): string
     {
-        return sprintf(
+        return \sprintf(
             "%s:host=%s;port=%d;dbname=%s",
             $this->driver,
             $this->host,
@@ -29,17 +32,17 @@ final class Pgsql extends Db
 
     protected function getUsername(): string
     {
-        return $_ENV['PG_USERNAME'] ?? 'postgres';
+        return $this->username;
     }
 
     protected function getPassword(): string
     {
-        return $_ENV['PG_PASSWORD'] ?? '';
+        return $this->password;
     }
 
     protected function getOptions(): array
     {
-        return $_ENV['PG_OPTIONS'] ?: $this->options;
+        return $this->options;
     }
 
     

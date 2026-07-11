@@ -23,7 +23,7 @@ final class Insert implements InsertInt
     public function __construct()
     {
         $this->state = new InsertState('INSERT');
-        $this->state->driver = $this->getDriver();
+       
     }
     
     /**
@@ -141,6 +141,7 @@ final class Insert implements InsertInt
               $this->state->params[$keys] = $this->state->values[$k];
               $this->state->bind[] = $keys;
         }
+       $this->state->driver = $this->getDriver();
 
         return $this;
     }
@@ -170,6 +171,7 @@ final class Insert implements InsertInt
      */
     private function compile():string{
         $this->binding();
+
         return InsertCompiler::toSql($this->state);
     }
 

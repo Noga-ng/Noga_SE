@@ -87,13 +87,7 @@ class Builder
 
         foreach ($cols as $i => $c) {
             if (\is_string($c)) {
-
-                if(\str_contains($c,"-")){
-                    $selectParts[] = "'{$c}'";
-                }else{
-                    $selectParts[] = "{$c}";
-                }
-                
+             $selectParts[] = \str_contains($c,"-") ? "'{$c}'" : "{$c}" ;
             } else
             if (is_callable($c) || $c instanceof Select) {
                 $sub           = $c;

@@ -33,23 +33,21 @@ class Select{
      */
     public function table(string | Select | callable $table, ?string $alias = ''): Select
     {
-        $clone = clone $this;
+        $clone       = clone $this;
+        $clone->from = $clone->initClause()->toform($table, $alias);
+        return $clone;
+    }
 
-        if (\is_string($table)) {
-            if (! empty($alias)) {
-                $clone->table = "$table AS $alias";
-            } else {
-                $clone->table = $table;
-            }
-        } else if (is_callable($table) || $table instanceof Select) {
-            $sub          = $table;
-            $sql          = $sub instanceof Select ? $sub->getQuery() : $sub($clone);
-            $clone->table = " ($sql) AS " . ($alias ?: 't');
-            if ($sub instanceof Select) {
-                $clone->params = $clone->mergeParams($sub->params);
-            }
-        }
-
+       /**
+     * Summary of from
+     * @param string|Select|callable $table
+     * @param string $alias
+     * @return Select
+     */
+    public function from(string | Select | callable $table, string $alias = ''): Select
+    {
+        $clone       = clone $this;
+        $clone->from = $clone->initClause()->toform($table, $alias);
         return $clone;
     }
 
@@ -129,19 +127,6 @@ class Select{
      */
     public static function c(string $condition, string $then, ?string $bindValue = ''):Cases{
         return (new Cases())->when($condition,$then,$bindValue);
-    }
-
-    /**
-     * Summary of from
-     * @param string|Select|callable $table
-     * @param string $alias
-     * @return Select
-     */
-    public function from(string | Select | callable $table, string $alias = ''): Select
-    {
-        $clone       = clone $this;
-        $clone->from = $clone->initClause()->toform($table, $alias);
-        return $clone;
     }
 
     /**

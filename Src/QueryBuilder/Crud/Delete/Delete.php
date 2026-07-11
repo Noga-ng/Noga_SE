@@ -16,7 +16,6 @@ final class Delete implements DeleteInt
     {
        $this->state = new DeleteState('DELETE');
        $this->state->table = $table;  
-       $this->state->driver = $this->getDriver();
     }
 
     public static function table(string $table):Delete{
@@ -36,6 +35,7 @@ final class Delete implements DeleteInt
     private function compile():string{
         $this->state->condition = $this->conditions;
         $this->state->params = $this->params;
+         $this->state->driver = $this->getDriver();
        return DeleteCompiler::toSql($this->state);
     }
 

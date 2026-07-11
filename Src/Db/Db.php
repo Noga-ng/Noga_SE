@@ -1,4 +1,5 @@
 <?php
+
 namespace Noga\Db;
 
 use Generator;
@@ -12,7 +13,8 @@ use Throwable;
 /**
  * Summary of Db
  */
-abstract class Db implements \Noga\Contracts\Db\Db{
+abstract class Db implements \Noga\Contracts\Db\Db
+{
     private ?PDO $pdo = null;
     protected array $instanceDb = [];
     private string $key = "";
@@ -29,9 +31,10 @@ abstract class Db implements \Noga\Contracts\Db\Db{
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false
-       ];
+    ];
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->key = md5($this->getDsn());
     }
 
@@ -47,32 +50,29 @@ abstract class Db implements \Noga\Contracts\Db\Db{
      * @return PDO|null
      */
 
-  public function connect():PDO|null{
+    public function connect(): PDO|null
+    {
         try {
 
-         if(!isset($this->instanceDb[$this->key])){
-         
-            $this->pdo = new PDO(
-                $this->getDsn(), 
-            $this->getUsername(),
-                $this->getPassword(),
-                $this->getOptions()
-            );
+            if (!isset($this->instanceDb[$this->key])) {
 
-            $this->pdo->exec($this->set_session);
+                $this->pdo = new PDO(
+                    $this->getDsn(),
+                    $this->getUsername(),
+                    $this->getPassword(),
+                    $this->getOptions()
+                );
 
-            $this->instanceDb[$this->key] = $this->pdo;
+                $this->pdo->exec($this->set_session);
 
-           }
+                $this->instanceDb[$this->key] = $this->pdo;
+            }
 
             return $this->instanceDb[$this->key];
-
-
-        } catch(PDOException $e) {
-            throw new RuntimeException("error connection : ".$e->getMessage());
+        } catch (PDOException $e) {
+            throw new RuntimeException("error connection : " . $e->getMessage());
         }
-
-}
+    }
 
     /**
      * Summary of disconnect
@@ -82,8 +82,9 @@ abstract class Db implements \Noga\Contracts\Db\Db{
      * 
      * @return null
      */
-    public function disconnect(){
-       return static::$pdo = null;
+    public function disconnect()
+    {
+        return static::$pdo = null;
     }
     /**
      * Summary of fais
@@ -96,17 +97,16 @@ abstract class Db implements \Noga\Contracts\Db\Db{
      * @throws RuntimeException
      * @return PDOStatement
      */
-    public function execute(string $sql,array $params = []):PDOStatement{
-       try{
+    public function execute(string $sql, array $params = []): PDOStatement
+    {
+        try {
 
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute($params);
-         return $stmt;
-
-       }catch(PDOException $e){
-        throw new RuntimeException("{$this->driver} => Request error : ".$e->getMessage());
-       }
-       
+            $stmt = $this->connect()->prepare($sql);
+            $stmt->execute($params);
+            return $stmt;
+        } catch (PDOException $e) {
+            throw new RuntimeException("{$this->driver} => Request error : " . $e->getMessage());
+        }
     }
     /**
      * Summary of One
@@ -122,8 +122,9 @@ abstract class Db implements \Noga\Contracts\Db\Db{
      * @param int $fetchMode
      * @return mixed
      */
-    public function one(string $sql,array $params = [],int $fetchMode = PDO::FETCH_OBJ):mixed{
-        $stmt = $this->execute($sql,$params);
+    public function one(string $sql, array $params = [], int $fetchMode = PDO::FETCH_OBJ): mixed
+    {
+        $stmt = $this->execute($sql, $params);
         return $stmt->fetch($fetchMode);
     }
 
@@ -141,36 +142,39 @@ abstract class Db implements \Noga\Contracts\Db\Db{
      * @param int $fetchMode
      * @return array
      */
-   public function all(string $sql, array $params = [],int $fetchMode = PDO::FETCH_OBJ):array{
+    public function all(string $sql, array $params = [], int $fetchMode = PDO::FETCH_OBJ): array
+    {
 
-    $stmt = $this->execute($sql, $params);
+        $stmt = $this->execute($sql, $params);
 
-    return $stmt->fetchAll($fetchMode);
-}
-
-/**
- * Summary of stream
- * this method is responsible for executing a SQL query and streaming the results one by one.
- * It takes a SQL query as a string, an optional array of parameters for the query, 
- * and an optional fetch mode (defaulting to PDO::FETCH_OBJ).
- * @param string $sql
- * @param array $params
- * @param int $fetchMode
- * @return Generator
- */
-public function stream(string $sql, array $params = [],int $fetchMode = PDO::FETCH_OBJ):Generator{
-     $stmt = $this->execute($sql, $params);
-       while ($row = $stmt->fetch($fetchMode)) {
-        yield $row;
+        return $stmt->fetchAll($fetchMode);
     }
-}
- 
+
+    /**
+     * Summary of stream
+     * this method is responsible for executing a SQL query and streaming the results one by one.
+     * It takes a SQL query as a string, an optional array of parameters for the query, 
+     * and an optional fetch mode (defaulting to PDO::FETCH_OBJ).
+     * @param string $sql
+     * @param array $params
+     * @param int $fetchMode
+     * @return Generator
+     */
+    public function stream(string $sql, array $params = [], int $fetchMode = PDO::FETCH_OBJ): Generator
+    {
+        $stmt = $this->execute($sql, $params);
+        while ($row = $stmt->fetch($fetchMode)) {
+            yield $row;
+        }
+    }
+
     /**
      * Summary of lastId
      * this method is responsible for retrieving the last inserted ID from the database.
      * @return bool|string
      */
-    public function lastId():string{
+    public function lastId(): string
+    {
         return $this->connect()->lastInsertId();
     }
 
@@ -186,17 +190,16 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
      * @param string $sql
      * @return bool|PDOStatement
      */
-    public function create(string $sql):PDOStatement{
-        try{
-            
+    public function create(string $sql): PDOStatement
+    {
+        try {
+
             $stmt = $this->connect()->prepare($sql);
             $stmt->execute();
             return $stmt;
-
-        }catch(PDOException $e){
-            throw new RuntimeException("{$this->driver} : ".$e->getMessage());
+        } catch (PDOException $e) {
+            throw new RuntimeException("{$this->driver} : " . $e->getMessage());
         }
-       
     }
 
     /**
@@ -211,23 +214,50 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
      * @throws RuntimeException
      * @return mixed
      */
-    public function toTransaction(callable|Select $callback,object $object):mixed{
-        
-        $this->connect()->beginTransaction();
-        try{
+    public function toTransaction(callable|Select $callback, object $object): mixed
+    {
+        try {
 
-            $data = \call_user_func($callback,$object);
-             
+            $this->connect()->beginTransaction();
+
+            $data = \call_user_func($callback, $object);
+
             $this->connect()->commit();
-           return $data;
-        }catch(Throwable $e){
+            return $data;
+        } catch (Throwable $e) {
             $this->connect()->rollBack();
-            throw new RuntimeException("{$this->driver} => Transaction error : ".$e->getMessage());
+            throw new RuntimeException("{$this->driver} => Transaction error : " . $e->getMessage());
         }
     }
 
-    public function getDatabase():string{
+    /**
+     * Summary of getDatabase
+     * @return string
+     */
+    public function getDatabase(): string
+    {
         return $this->database;
+    }
+
+    /**
+     * Summary of newConnection
+     * @param array{host:string,port:int,charset:string} $dsn
+     * @param string $username
+     * @param string $password
+     * @param array $options
+     * @return static
+     */
+    public function newConnection(array $dsn, string $username, string $password, array $options = []): static
+    {
+        $this->host = $dsn['host'];
+        $this->port = $dsn['port'];
+        $this->username = $username;
+        $this->password = $password;
+
+        if (isset($dsn['charset'])) $this->charset = $dsn['charset'];
+        if (!empty($options)) $this->options = $options;
+
+        return $this;
     }
 
     /**
@@ -242,14 +272,14 @@ public function stream(string $sql, array $params = [],int $fetchMode = PDO::FET
      * @throws PDOException
      * @return string
      */
-    abstract protected function getDsn():string;
+    abstract protected function getDsn(): string;
 
     /**
      * Summary of getUsername
      * this method is responsible for construct and returning the usersName in mysql and SQLite
      * @return string
      */
-    abstract protected function getUsername():string;
-    abstract protected function getPassword():string;
-    abstract protected function getOptions():array;
+    abstract protected function getUsername(): string;
+    abstract protected function getPassword(): string;
+    abstract protected function getOptions(): array;
 }

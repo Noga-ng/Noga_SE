@@ -3,6 +3,7 @@ namespace Noga\Db;
 
 use Noga\Db\Db;
 class Mysql extends Db{
+
     public function __construct(protected ?string $database = null)
     {
             $this->driver = $_ENV['MY_DRIVER'] ?? 'mysql';
@@ -10,13 +11,15 @@ class Mysql extends Db{
             $this->port = $_ENV['DB_PORT'] ?: 3306;
             $this->database = $this->database ?: $_ENV['MY_DATABASE'];
             $this->charset = $_ENV['MY_CHARSET'] ?? 'utf8mb4';
+            $this->username = $_ENV['MY_USERSNAME'] ?? 'root';
+            $this->password = $_ENV['MY_PASSWORD'] ?? "";
+            $this->options = $_ENV['MY_OPTIONS'] ?? $this->options;
             $this->set_session = $_ENV['MY_SET_SESSION'] ?? "SET SESSION sql_mode=''";
-
     }
 
     protected function getDsn(): string
     {
-        return sprintf(
+        return \sprintf(
             "%s:host=%s;port=%d;dbname=%s;charset=%s",
             $this->driver,
             $this->host,
@@ -28,17 +31,17 @@ class Mysql extends Db{
 
     protected function getUsername(): string
     {
-        return $_ENV['MY_USERNAME'] ?? 'root';
+        return $this->username;
     }
 
     protected function getPassword(): string
     {
-        return $_ENV['MY_PASSWORD'] ?? '';
+        return $this->password;
     }
 
     protected function getOptions(): array
     {
-        return $_ENV['MY_OPTIONS'] ?: $this->options;
+        return $this->options;
     }
 
 

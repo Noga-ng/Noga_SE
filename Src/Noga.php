@@ -52,6 +52,7 @@ final class Noga extends Facade
 
     /**
      * Summary of get
+     * @var string{base_path,cache_path,driver}
      * @param string $key
      * @return mixed
      */

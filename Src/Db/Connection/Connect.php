@@ -38,9 +38,9 @@ class Connect{
     {
         $this->driver = $driver ??= Noga::get('driver');
 
-          if(!\in_array($this->driver,self::DRIVER_ACCEPT)){
-                throw new RuntimeException("{$this->driver} is not supported");
-          }
+        if(!\in_array($this->driver,self::DRIVER_ACCEPT)){
+            throw new RuntimeException("{$this->driver} is not supported");
+        }
 
     }
 
@@ -50,7 +50,7 @@ class Connect{
      * @return static
      */
     public static function driver(?string $driver = null):static{    
-           return new static($driver);
+        return new static($driver);
     }
 
     /**

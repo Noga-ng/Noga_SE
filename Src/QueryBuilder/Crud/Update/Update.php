@@ -20,7 +20,6 @@ final class Update
     {
        $this->state = new UpdateState('UPDATE');
        $this->state->table = $table;
-       $this->state->driver = $this->getDriver();
     }
 
     /**
@@ -56,6 +55,7 @@ final class Update
     private function compile():string{
         $this->state->conditions = array_merge($this->state->conditions,$this->conditions);
         $this->state->params = array_merge($this->state->params,$this->params);
+         $this->state->driver = $this->getDriver();
         return UpdateCompiler::toSql($this->state);
     }
 

@@ -76,5 +76,20 @@ trait DbTrait
        return $this->db()->toTransaction($callback,$this);
     }
 
+
+    /**
+     * Summary of newConnection
+     * @param array{host:string,port:int,charset:string} $dsn
+     * @param string $username
+     * @param string $password
+     * @param array $options
+     * @return static
+     */
+    public function newConnection(array $dsn,string $username,string $password,array $options = []):static{
+     $clone = clone $this;
+     $clone->db()->newConnection($dsn, $username, $password, $options);
+     return $clone;
+    }
+
 }
 

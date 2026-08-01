@@ -51,4 +51,8 @@ abstract class QueryTest extends TestCase
         }
         return $param;
     }
+
+    protected function assignedInstanceClass(string $classExcepted,mixed $class,string $message = ''){
+        $this->assertInstanceOf($classExcepted,$class,$message);
+    }
 }

@@ -1,0 +1,23 @@
+<?php
+declare(strict_types=1);
+
+namespace Noga\CLI\Exceptions;
+
+use Noga\CLI\Renderer\Renderer;
+use Noga\CLI\Renderer\Type\Enum\Color;
+use Throwable;
+
+final class HandleCliException{
+    public static function handle(Throwable $e,bool $trace = true){
+         $debug = ($trace) ? \debug_backtrace() : ["file"=>$e->getFile(),"line"=>$e->getLine()];
+
+        Renderer::data([
+            "ERROR"=>true,
+            "CODE"=>$e->getCode(),
+            "MESSAGE"=>$e->getMessage(),
+            "DEBUG"=>[
+                $debug
+            ] ?? null
+        ])->json(Color::RED);
+    }
+}

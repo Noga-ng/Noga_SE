@@ -20,7 +20,7 @@ class CacheManager
 
     public function __construct(string | array $key = "")
     {
-        $this->basePath = Noga::get("cache_path") ?: __DIR__ . "/../../src/cache";
+        $this->basePath = Noga::get("cache_path") ?: __DIR__ . "/../../cache";
         $this->path      = $this->basePath;
         $this->key       = $key;
         $this->data      = null;
@@ -53,7 +53,7 @@ class CacheManager
 
     private function buildKey(): string
     {
-        return is_array($this->key)
+        return \is_array($this->key)
             ? hash('xxh128', serialize($this->key))
             : hash('xxh128', $this->key);
     }
@@ -124,9 +124,7 @@ class CacheManager
     {
         $path = $this->getPath();
         try {
-
             return file_exists($path) ? require $path : null;
-
         } catch (Throwable $e) {
             $this->debug = $e->getMessage();
             return null;
@@ -143,7 +141,7 @@ class CacheManager
     public function getSignature(): string
     {
         $data = $this->get();
-        return isset($data['signature']) ? $data['signature'] : "";
+        return isset($data['signature']) ?? "";
     }
 
     public static function getAll(string $dir): Generator
@@ -254,7 +252,7 @@ class CacheManager
 
     private function generateSignature(array $data): string
     {
-        return md5(\serialize($data));
+        return hash('xxh128',serialize($data));
     }
 
     public function debug(): ?string

@@ -6,14 +6,22 @@ use Noga\Contracts\Bind\BindingInt;
 final class BindHashing implements BindingInt{
     private string $bindParams = "";
 
-    public function __construct(private string $prefix,private string $columns,private int $bytelength = 4)
-    {
+    public function __construct(
+      private string $prefix,
+      private string $columns
+      ){
         $col = str_replace(['.', '-'], '_', $this->columns);
-        $hash = \bin2hex(\random_bytes($bytelength));
+        $hash = \bin2hex(\random_bytes(4));
         $this->bindParams = ":{$this->prefix}_{$hash}_{$col}";
     }
     
-    public static function hash(string $prefix,string $columns,int $bytelength = 4):string{
+    /**
+     * Summary of hash
+     * @param string $prefix
+     * @param string $columns
+     * @return string
+     */
+    public static function hash(string $prefix,string $columns):string{
       $instance = new static($prefix,$columns);
       return $instance->bindParams;
     }

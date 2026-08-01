@@ -32,6 +32,7 @@
   },
 
   "require-dev": {
+    "phpstan/phpstan": "^2.2",
     "phpunit/phpunit": "^10.0"
   },
 
@@ -45,6 +46,7 @@
 
   "scripts": {
     "test": "phpunit",
+    "analyse":"phpstan analyse",
     "dump": "composer dump-autoload -o"
   }
 }

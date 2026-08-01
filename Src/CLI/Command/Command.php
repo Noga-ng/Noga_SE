@@ -1,12 +1,17 @@
-<?php declare(strict_types=1);
+<?php 
+declare(strict_types=1);
 namespace Noga\CLI\Command;
 
+use Noga\CLI\Exceptions\InvalidCommandArgument;
+use Noga\CLI\Renderer\Color\Colors;
+use Noga\CLI\Renderer\Renderer;
 use Noga\Core\CacheManager;
+use Noga\Exceptions\InvalidQueryArgumentException;
+use Noga\Exceptions\NotFountException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Noga\CLI\Services\Render;
 
-class Command
+final class Command
 {
     private array $dir = [];
     private array $class = [];
@@ -58,7 +63,7 @@ class Command
     {
         $dirs = [];
 
-        if (is_array($dir)) {
+        if (\is_array($dir)) {
             foreach ($dir as $path) {
                 $dirs[] = __DIR__ . "/../../../".trim($path, '/');
             }
@@ -78,8 +83,8 @@ class Command
         $this->command = [];
         $this->class = [];
 
-        if (!is_array($this->dir)) {
-          
+        if (!\is_array($this->dir)) {
+          throw new InvalidCommandArgument("cache dir most be of type array");
         }
 
         foreach ($this->dir as $dir) {
@@ -111,7 +116,7 @@ class Command
 
                 $class = ucwords($file, '\\');
                
-                if (in_array($name, ['Command', 'Kernel'])) {
+                if (\in_array($name, ['Command', 'Kernel'])) {
                     continue;
                 }
 
@@ -128,48 +133,41 @@ class Command
     {
         $cache = $this->cache->data($this->command)->put();
 
-        echo color(
-            "Command cache generated (" . count($this->command) . " commands)\n in {$cache->getPath()}",
-            'green'
+        Colors::success(
+            "Command cache generated (" . \count($this->command) . " commands)\n in {$cache->getPath()}"
         );
 
-        exit(0);
+        return;
     }
 
     public function show(): void
     {
         $cache = $this->cache->get();
 
-        if (!is_array($cache) || !isset($cache['data']) || !is_array($cache['data'])) {
-            error("no command available !");
-            exit(1);
+        if (!\is_array($cache) || !isset($cache['data']) || !\is_array($cache['data'])) {
+            Colors::warning("no command available !");
+            return;
         }
 
-        Render::data($cache['data'])->array();
+        Renderer::data($cache['data'])->arr();
     }
 
     public function clear(): void
     {
         if ($this->cache->has()) {
             $this->cache->delete();
-            \success("cache deleted !");
-            exit(0);
+            Colors::success("cache deleted !");
+            return;
         }
-
-        error("cache not found !");
-        exit(1);
+        Colors::error('Cache is not found ');
+        return;
     }
 
     public function list():array
     {
         $command = [];
         $comm = $this->cache->get();
-
-        if(!empty($comm)){
-            $command = $comm['data'];
-        }else{
-               $command = $this->command;
-        }
+        $command = !empty($comm) ? $comm['data'] : $this->command;
 
         return $command;
     }
@@ -178,7 +176,7 @@ class Command
     {
         $cache = $this->cache->get();
 
-        if (is_array($cache) && isset($cache['data'])) {
+        if (\is_array($cache) && isset($cache['data'])) {
             $this->command = $cache['data'];
         }
 
@@ -186,7 +184,7 @@ class Command
             ? "$key => {$this->command[$key]}"
             : "Command not Found $key";
 
-        \success($com);
+        Colors::success($com);
     }
 
     public function add(string $key, string $command): static

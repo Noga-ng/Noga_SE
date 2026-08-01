@@ -53,7 +53,7 @@ class Builder
      * @throws InvalidArgumentException
      * @return string
      */
-    public function toform(string | Select | callable $table, ?string $alias = ''): string
+    public function toForm(string | Select | callable $table, ?string $alias = ''): string
     {
         $clone = $this->cloneSelf();
 
@@ -80,7 +80,7 @@ class Builder
      * @param array $cols
      * @return array[]
      */
-    public function toselect(array $cols): array
+    public function toSelect(array $cols): array
     {
         $clone       = $this->cloneSelf();
         $selectParts = [];
@@ -137,7 +137,7 @@ class Builder
      * @throws InvalidArgumentException
      * @return array[]
      */
-    public function towhere(array $cols = []): array
+    public function toWhere(array $cols = []): array
     {
         $clone = $this->cloneSelf();
 
@@ -175,7 +175,7 @@ class Builder
      * @param string $sign
      * @return array
      */
-    public function towhereColumn(string $col1, string | int $value, string $sign = '='): array
+    public function toWhereColumn(string $col1, string | int $value, string $sign = '='): array
     {
         $clone               = $this->cloneSelf();
         $clone->conditions[] = "$col1 $sign $value";
@@ -188,7 +188,7 @@ class Builder
      * @throws InvalidArgumentException
      * @return array[]
      */
-    public function towhereOr(array $cols = []): array
+    public function toWhereOr(array $cols = []): array
     {
         $clone = $this->cloneSelf();
         $or    = [];
@@ -224,7 +224,7 @@ class Builder
      * @param array $cols
      * @return array[]
      */
-    public function towhereLike(array $cols = []): array
+    public function toWhereLike(array $cols = []): array
     {
         $clone = $this->cloneSelf();
         $likes = [];
@@ -246,7 +246,7 @@ class Builder
      * @throws InvalidArgumentException
      * @return array[]
      */
-    public function towhereBetween(array $cols, bool $not): array
+    public function toWhereBetween(array $cols, bool $not): array
     {
         $clone = $this->cloneSelf();
         $parts = [];
@@ -320,7 +320,7 @@ class Builder
      * @throws InvalidArgumentException
      * @return array[]
      */
-    public function towhereIn(string $col, callable | Select | array $values, bool $not): array
+    public function toWhereIn(string $col, callable | Select | array $values, bool $not): array
     {
         $clone = $this->cloneSelf();
 
@@ -491,7 +491,7 @@ class Builder
      * @param string $mode
      * @return array<array|string>
      */
-    public function toexplain(callable | Select | string $explain, string $mode = ''): array
+    public function toExplain(callable | Select | string $explain, string $mode = ''): array
     {
         $clone         = $this->cloneSelf();
         $sql           = '';

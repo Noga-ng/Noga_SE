@@ -5,6 +5,10 @@ use Noga\Core\CacheManager;
 
 trait CacheQuery{
 
+    public static function make():static{
+    return new static(/* dependence */);
+    }
+    
   private string $cacheDir = "sql";
 
    /**

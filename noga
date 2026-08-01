@@ -27,7 +27,7 @@ use Noga\Noga;
 
 Noga::config(
     __DIR__,
-    __DIR__."/src/cache",
+    __DIR__."/cache",
     'pgsql'
 );
 

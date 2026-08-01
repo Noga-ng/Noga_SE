@@ -37,7 +37,7 @@ trait DbTrait
 
     /**
      * Summary of database
-     * @param mixed $database
+     * @param string|null $database
      * @return static
      */
     public function database(?string $database = null):static

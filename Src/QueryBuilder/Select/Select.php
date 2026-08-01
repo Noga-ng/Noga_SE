@@ -80,15 +80,15 @@ class Select{
 
     /**
      * Summary of select
-     * @param array $col
+     * @param array<string> $col
      * @return Select
      */
-    public function select(...$col): Select
+    public function select(string ...$col): Select
     {
         $clone = clone $this;
 
         [$cols, $params] = $clone->initClause()
-            ->toselect($col);
+            ->toSelect($col);
 
         $clone->cols = $clone->mergeColumn($cols);
 
@@ -107,14 +107,14 @@ class Select{
     /**
      * Summary of selectCase
      * @param Cases $case
-     * @param string $colonne
+     * @param string $columns
      * @return Select
      */
-    public function selectCase(Cases $case, string $colonne = ''): Select
+    public function selectCase(Cases $case, string $columns = ''): Select
     {
         $clone           = clone $this;
         [$cols, $params] = $clone->initClause()
-            ->toCase($case, $colonne);
+            ->toCase($case, $columns);
 
         $clone->cols   = $clone->mergeColumn($cols);
         $clone->params = $clone->mergeParams($params);
@@ -308,14 +308,14 @@ class Select{
      */
     public function explain(callable | Select | string $explain, string $mode = ''): Select
     {
-        $instance       = clone $this;
-        [$sql, $params] = $instance->initClause()
-            ->toexplain($explain, $mode);
+        $clone       = clone $this;
+        [$sql, $params] = $clone->initClause()
+            ->toExplain($explain, $mode);
 
-        $instance->params  = $params;
-        $instance->explain = $sql;
+        $clone->params  = $params;
+        $clone->explain = $sql;
 
-        return $instance;
+        return $clone;
     }
 
       /**
@@ -341,41 +341,43 @@ class Select{
      */
     private function compiler(): string
     {
-        $clone = clone $this;
 
-        $table    = ! empty($clone->from) ? $clone->from : $clone->table;
-        $distinct = $clone->distinct ? ' DISTINCT ' : '';
+        $table    = ! empty($this->from) ? $this->from : $this->table;
+        $distinct = $this->distinct ? ' DISTINCT ' : '';
 
-        $clone->sql = "SELECT {$distinct}" . (implode(',', $clone->cols) ?: '*') . " FROM {$table} ";
+        if(empty($this->cols)) $this->cols[] = "*";
+        $cols = implode(',',$this->cols);
 
-        if (! empty($clone->join))  $clone->sql .= $clone->join;
+        $this->sql = "SELECT {$distinct} {$cols} FROM {$table} ";
+
+        if (! empty($this->join))  $this->sql .= $this->join;
     
-        if (! empty($clone->conditions)) $clone->sql .= ' WHERE ' . implode(' AND ', $clone->conditions) . ' ';
+        if (! empty($this->conditions)) $this->sql .= ' WHERE ' . implode(' AND ', $this->conditions) . ' ';
 
-        if (! empty($clone->groups)) $clone->sql .= ' GROUP BY ' . implode(',', $clone->groups);
+        if (! empty($this->groups)) $this->sql .= ' GROUP BY ' . implode(',', $this->groups);
 
-        if (! empty($clone->groups) && ! empty($clone->having)) $clone->sql .= ' HAVING ' . implode(' AND ', $clone->having);
+        if (! empty($this->groups) && ! empty($clone->having)) $this->sql .= ' HAVING ' . implode(' AND ', $this->having);
 
-        if (! empty($clone->union)) $clone->sql .= $clone->union;
+        if (! empty($this->union)) $this->sql .= $this->union;
 
-        if ($clone->order !== '') {
-            $clone->sql .= " ORDER BY {$clone->order} ";
+        if ($this->order !== '') {
+            $this->sql .= " ORDER BY {$this->order} ";
         }
         
 
-        if ($clone->limit !== null) {
-            $clone->sql .= " LIMIT {$clone->limit} ";
+        if ($this->limit !== null) {
+            $this->sql .= " LIMIT {$this->limit} ";
         }
 
-        if ($clone->offset !== null) {
-            $clone->sql .= " OFFSET {$clone->offset} ";
+        if ($this->offset !== null) {
+            $this->sql .= " OFFSET {$this->offset} ";
         }
 
         //Recurcive cte
-        if (! empty($clone->cte)) {
+        if (! empty($this->cte)) {
             $requestWith = [];
             $recursive   = '';
-            foreach ($clone->cte as $info) {
+            foreach ($this->cte as $info) {
                 $requestWith[] = "{$info['name']} AS ({$info['sql']})";
                 if ($info['recursive']) {
                     $recursive = 'RECURSIVE';
@@ -383,41 +385,31 @@ class Select{
 
             }
 
-            $clone->sql = "WITH {$recursive} " .
+            $this->sql = "WITH {$recursive} " .
             implode(', ', $requestWith) .
             ' ' .
-            $clone->sql;
+            $this->sql;
         }
 
         //explain
         if (! empty($clone->explain)) {
-            $clone->sql = $clone->explain;
+            $this->sql = $this->explain;
         }
 
-        return $clone->sql;
+        return $this->sql;
 
-    }
-
-    /**
-     * Summary of mergeParams
-     * @param array $params
-     * @return array
-     */
-    private function mergeParams(array $params): array
-    {
-        $this->params = array_merge($this->params, $params);
-        return $this->params;
     }
 
     /**
      * Summary of addParams
      * @param array $params
-     * @return static
+     * @return Select
      */
-    public function addParams(array $params): static
+    public function setParams(array $params): Select
     {
-        $this->params = $this->mergeParams($params);
-        return $this;
+        $clone = clone $this;
+        $clone->params = $clone->mergeParams($params);
+        return $clone;
     }
 
     /**
@@ -508,12 +500,10 @@ class Select{
      */
     public function use_query(string $key):Select
     {
-        $clone = clone $this;
-
-        $clone->request = $this->cache($key)
+        $this->request = $this->cache($key)
             ->get()["data"];
 
-        return $clone;
+        return $this;
     }
 
     /**
@@ -616,7 +606,5 @@ class Select{
         if ($this->buildUnion !== null) {
             $this->buildUnion = clone $this->buildUnion;
         }
-
-      
     }
 }

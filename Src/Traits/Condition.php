@@ -26,7 +26,7 @@ trait Condition{
      * Summary of initClause
      * @return Builder|null
      */
-    private function initClause(): Builder
+    private function initClause(): Builder|null
     {
         if ($this->buildClause === null) {
             $this->buildClause = new Builder();
@@ -39,11 +39,11 @@ trait Condition{
      * @param array $condition
      * @return array
      */
-    private function mergeCond(array $condition): array
+    private function mergeCond(array $condition = []): array
     {
         $this->conditions = \array_merge(
             $this->conditions,
-            $condition ?? []
+            $condition
         );
         return $this->conditions;
     }
@@ -90,7 +90,7 @@ trait Condition{
     {
         $clone                = clone $this;
         [$condition, $params] = $clone->initClause()
-            ->towhere($cols);
+            ->toWhere($cols);
         $clone->conditions = $clone->mergeCond($condition);
         $clone->params     = $clone->mergeParams($params);
 
@@ -106,7 +106,7 @@ trait Condition{
     {
         $clone                = clone $this;
         [$condition, $params] = $clone->initClause()
-            ->towhereOr($cols);
+            ->toWhereOr($cols);
         $clone->conditions = $clone->mergeCond($condition);
         $clone->params     = $clone->mergeParams($params);
 
@@ -122,7 +122,7 @@ trait Condition{
     {
         $clone                = clone $this;
         [$condition, $params] = $clone->initClause()
-            ->towhereLike($cols);
+            ->toWhereLike($cols);
         $clone->conditions = $clone->mergeCond($condition);
         $clone->params     = $clone->mergeParams($params);
 
@@ -141,7 +141,7 @@ trait Condition{
         $clone = clone $this;
 
         [$conditions, $params] = $clone->initClause()
-            ->towhereIn($cols, $values, $not);
+            ->toWhereIn($cols, $values, $not);
         $clone->params     = $clone->mergeParams($params);
         $clone->conditions = $clone->mergeCond($conditions);
         return $clone;
@@ -156,7 +156,7 @@ trait Condition{
     {
         $clone                 = clone $this;
         [$conditions, $params] = $clone->initClause()
-            ->towhereBetween($cols, false);
+            ->toWhereBetween($cols, false);
         $clone->conditions = $clone->mergeCond($conditions);
         $clone->params     = $clone->mergeParams($params);
 
@@ -172,7 +172,7 @@ trait Condition{
     {
         $clone                 = clone $this;
         [$conditions, $params] = $clone->initClause()
-            ->towhereBetween($cols, true);
+            ->toWhereBetween($cols, true);
         $clone->conditions = $clone->mergeCond($conditions);
         $clone->params     = $clone->mergeParams($params);
 
@@ -191,7 +191,7 @@ trait Condition{
         $clone = clone $this;
         $cond  = [];
         $cond  = $clone->initClause()
-            ->towhereColumn($cols, $signComparaison, $value);
+            ->toWhereColumn($cols, $signComparaison, $value);
         $clone->conditions = $clone->mergeCond($cond);
 
         return $clone;

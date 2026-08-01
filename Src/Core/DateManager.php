@@ -47,10 +47,10 @@ class DateManager {
         $this->lang = \in_array($this->lang, ['fr','en']) ? $this->lang : 'fr';
         $this->format = $format ?? 'd m Y';
 
-        $this->strContruct();
+        $this->strConstruct();
     }
 
-    public function strContruct(): string {
+    public function strConstruct(): string {
         $jourNum = (int)date('N', $this->timestamp); // 1 = lundi
         $this->replacements = [
             'd' => date('d', $this->timestamp),

@@ -1,10 +1,15 @@
-<?php declare(strict_types=1);
+<?php 
+declare(strict_types=1);
 namespace Noga\CLI;
 
 use Noga\CLI\Command\Command;
+use Noga\CLI\Exceptions\BadMethodCommandException;
+use Noga\CLI\Exceptions\HandleCliException;
+use Noga\CLI\Renderer\Color\Colors;
+use Noga\CLI\Renderer\Renderer;
 use Noga\CLI\Services\Init;
-use Noga\CLI\Services\Render;
 use Noga\Tests\Test;
+use Throwable;
 
 class Kernel{
    private array $argv = [];
@@ -41,27 +46,34 @@ class Kernel{
    }
 
    public function handle():void{
+      try{
+
      $this->boot();
      $this->class_handle();
      $this->auto_command();
+
+      }catch(Throwable $e){
+         HandleCliException::handle($e);
+      }
+    
      }
 
     private function boot(){
         if(!isset($this->argv[1])){
       Init::boot($this->command);
-         exit(0);
+         return;
 
      }else if($this->argv[1] == '-v'){
 
-      \success(" Noga version ".\NOGA_SE_VERSION);
+      Colors::success(" Noga version ".\NOGA_SE_VERSION);
 
      }else if($this->argv[1] == 'init'){
       
       (new Init($this->argv))->init();
 
      }else if($this->argv[1] == '-h'){
-         Render::data($this->command)->array();
-         exit(0);
+         Renderer::data($this->command)->arr();
+         return;
      }else if($this->argv[1] == 'Test'){
          Test::handle();
      }
@@ -74,24 +86,20 @@ public function class_handle(){
      if(preg_match('/^([A-Za-z_]+)@([A-Za-z_]+)$/',$this->argv[1],$m)){  
       $class = $this->command[$m[1]];
       if(!isset($class) || !\class_exists($class)){
-         error("class undefinied !");
-         exit(1);
+         throw new BadMethodCommandException("class is not defined {$class}");
       }
 
       $handle = $m[2];
 
       if(!\method_exists($class,$handle)){
-             error("function is undefinied !");
-         exit(1);
+           throw new BadMethodCommandException("method {$handle} is not defined in class {$class}");
       }
 
       $class::$handle();
 
       }
 
-      }
-
-
+   }
 
       public function auto_command(){
          if($this->argv[1] === 'command'){
@@ -107,7 +115,6 @@ public function class_handle(){
                   '--c'=>'clear',
                  default => 'handle' 
                };
-
                 
             }
 

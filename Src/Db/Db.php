@@ -16,7 +16,7 @@ use Throwable;
 abstract class Db implements \Noga\Contracts\Db\Db
 {
     private ?PDO $pdo = null;
-    protected array $instanceDb = [];
+    protected static array $instanceDb = [];
     private string $key = "";
     protected string $host;
     protected ?int $port;
@@ -54,7 +54,7 @@ abstract class Db implements \Noga\Contracts\Db\Db
     {
         try {
 
-            if (!isset($this->instanceDb[$this->key])) {
+            if (!isset(self::$instanceDb[$this->key])) {
 
                 $this->pdo = new PDO(
                     $this->getDsn(),
@@ -65,10 +65,10 @@ abstract class Db implements \Noga\Contracts\Db\Db
 
                 $this->pdo->exec($this->set_session);
 
-                $this->instanceDb[$this->key] = $this->pdo;
+                self::$instanceDb[$this->key] = $this->pdo;
             }
 
-            return $this->instanceDb[$this->key];
+            return self::$instanceDb[$this->key];
         } catch (PDOException $e) {
             throw new RuntimeException("error connection : " . $e->getMessage());
         }
@@ -84,7 +84,9 @@ abstract class Db implements \Noga\Contracts\Db\Db
      */
     public function disconnect()
     {
-        return static::$pdo = null;
+         self::$instanceDb = [];
+         static::$pdo = null;
+         return null;
     }
     /**
      * Summary of fais

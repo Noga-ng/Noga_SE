@@ -1,10 +1,12 @@
 <?php declare(strict_types=1);
 namespace Noga\CLI\Services;
 
-use Noga\CLI\Services\Render;
+use Noga\CLI\Renderer\Color\Colors;
+use Noga\CLI\Renderer\Renderer;
+use Noga\CLI\Renderer\Type\Enum\Color;
 use Noga\Noga;
 
-class Init
+final class Init
 {
     private array $argv = [];
     public function __construct(array $args = [])
@@ -12,7 +14,7 @@ class Init
        $this->argv = $args;
     }
 
-    public function init()
+    public function init():void
     {   
         
         $dir = Noga::get("base_path") .'/Config/';
@@ -21,27 +23,27 @@ class Init
            if($this->argv[2] === "--dump"){
          $cont = \file_get_contents($file);
 
-        echo " configuration Noga : ". color('ngconfig.ng',"yellow")."\n";
+        echo " configuration Noga : ". Colors::paint('ngconfig.ng',Color::YELLOW)."\n";
         echo "----------------------------------------\n";
-        echo $cont . "\n";
+        echo "$cont \n";
         echo "----------------------------------------\n";
         return;
     }
 
         echo "---------------------------------------------------------------------------\n";
-              echo color("WELCOME TO NOGA FRAMEWORK INIT CONFIGURATION FILE GENERATOR\n",'green');
+              echo Colors::paint("WELCOME TO NOGA FRAMEWORK INIT CONFIGURATION FILE GENERATOR\n",Color::GREEN);
         echo "----------------------------------------------------------------------------\n";
-        echo "This utility will help you create a configuration file for your ".color("Noga",'yellow')."\n\n";
+        echo "This utility will help you create a configuration file for your ".Colors::paint("Noga",Color::YELLOW)."\n\n";
         echo "\n";
         echo "\n";
     
     $choose = ask("vous avez creer vraiment cette fichier de configuration (Y\N) ");
        
 
-    if(in_array($choose,['Y','y'])){
+    if(\in_array($choose,['Y','y'])){
        
     if (file_exists($file)) {
-        echo "⚠️".color(" Le fichier de configuration 'ngconfig.ng' existe déjà.\n",'red');
+        echo "⚠️".Colors::paint(" Le fichier de configuration 'ngconfig.ng' existe déjà.\n",Color::RED);
 
         $cont = \file_get_contents($file);
 
@@ -60,7 +62,7 @@ class Init
     $content = self::fileContent('ngconfig');
     file_put_contents($file, $content);
 
-    echo "✅ Fichier de configuration ".color("ngconfig.ng",'yellow')." créé avec succès dans le dossier $file.\n";
+    echo "✅ Fichier de configuration ".Colors::paint("ngconfig.ng",Color::YELLOW)." créé avec succès dans le dossier $file.\n";
 
     }else if(\in_array($choose,["N","n"])){
         return;
@@ -71,16 +73,17 @@ class Init
 
 public static function boot(array $command = []){
     echo "---------------------------------------------------------------------------\n";
-    echo "-------------------------- ". color("WELCOME TO THE NOGA",'green')." -----------------------\n";
+    echo "-------------------------- ". Colors::paint("WELCOME TO THE NOGA",Color::GREEN)." -----------------------\n";
     echo "----------------------------------------------------------------------------\n";
-    echo "-------------------------- ".color("version ".\NOGA_SE_VERSION,"green")." ----------------------\n";
+    echo "-------------------------- ".Colors::paint("version ".\NOGA_SE_VERSION,Color::GREEN)." ----------------------\n";
     echo "\n";
     echo "\n";
     echo "----------------------------------------------------------------------------\n";
-    echo "----------------------------- "; \success('COMMAND'); echo " ----------------------------\n";
+    echo "----------------------------- "; Colors::success('COMMAND'); echo " ----------------------------\n";
     echo "\n";
     echo "\n";
-    Render::data($command)->array();
+
+    Renderer::data($command)->arr();
 
     return;
 } 
